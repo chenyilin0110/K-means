@@ -9,6 +9,7 @@
 double countDistance(double point[],double center[]);
 double countsingleDistance(double point,double center);
 void group(double pointToCenterDistance[],double dataSet[],int k,int row);
+int permutation(int p);
 
 int main()
 {
@@ -19,7 +20,7 @@ int main()
 	    FILE *fptr;
 		char x1[3]={},x2[3]={},x3[3]={},x4[3]={},x5[3]={},empty[]="EOF";
 		double dataSet[150][5] = {0},read[150][5] = {0},accuracy;
-		int i,j,h,count = 0,row = 4,column = 0,k = 3,co = 1,tr = 0;
+		int i,j,h,count = 0,row = 4,column = 0,k = 3,co = 1,tr = 0,p;
 		
 		fptr = fopen("K-meansDataSet.txt","r");
 		while(fscanf(fptr,"%s %s %s %s %s",&x1,&x2,&x3,&x4,&x5) != EOF)
@@ -37,6 +38,7 @@ int main()
 				break;
 		}
 		fclose(fptr);
+		printf("countRun = %d\n",countRun);
 		//initial rand k 
 		int r[k] = {0};
 		double centerData[k][row] = {0},pointToCenterDistance[column][k] = {0};
@@ -90,12 +92,8 @@ int main()
 			for(i=0;i<k;i++)
 				for(j=0;j<row;j++)
 					centerData[i][j] = x[i][j];		
-			//SSE count point to center distance						
-			double total = 0;
-			for(i=0;i<column;i++)
-				for(h=0;h<k;h++)						
-					pointToCenterDistance[i][h] = countDistance(dataSet[i],centerData[h]);
-			//count every group sum
+			//SSE count every group sum
+			double total = 0;			
 			for(h=1;h<=k;h++)
 				for(i=0;i<column;i++)
 					if(dataSet[i][row] == h)
@@ -104,11 +102,16 @@ int main()
 			co++;
 			printf("SSE = %f\n",total);
 		}		
-//		printf("\n");
-//		for(i=0;i<column;i++)		
-//			printf("%f   %f\n",dataSet[i][row],read[i][row]);		
 		countRun++;
 		printf("\n");
+//		p = permutation(k);
+//		for(i=1;i<=k;i++)
+//		{
+//			for(j=0;j<(p/k);j++)
+//			{
+//				
+//			}
+//		}
 	}	
 }
 
@@ -142,3 +145,13 @@ void group(double pointToCenterDistance[],double dataSet[],int k,int row)
 		}
 	}
 }
+
+int permutation(int p)
+{
+	if(p == 1)
+		return 1;
+	else
+		return permutation(p-1) * p;
+}
+
+
