@@ -3,7 +3,7 @@
 #include <time.h>
 #include <math.h>
 #include <string.h>
-#define run 1 
+#define run 30 
 #define maxIteration 50
 
 double countDistance(double point[],double center[]);
@@ -17,14 +17,14 @@ int countPerm = 0;
 int main()
 {
     int countRun = 1;
-    double runBest = 0;
+    double runBest = 0,sseRunData = 0,percentRunData = 0;
     srand(time(NULL));
     while(countRun <= run)
     {
     	countPerm = 0;
 	    FILE *fptr;
 		char x1[3]={},x2[3]={},x3[3]={},x4[3]={},x5[3]={},empty[]="EOF";
-		double dataSet[150][5] = {0},read[150][5] = {0},accuracy;
+		double dataSet[150][5] = {0},read[150][5] = {0};
 		int i,j,h,row = 4,column = 0,k = 3,co = 1,p,bestTrueGroup = 0;
 				
 		fptr = fopen("K-meansDataSet.txt","r");
@@ -45,14 +45,9 @@ int main()
 		fclose(fptr);				
 		
 		p = permutation(k);		
-//		printf("countRun = %d\n",countRun);		
 		//initial rand k 
 		int r[k] = {0},sortTempData[column] = {0},sortData[k] = {0},trueGroupData[column] = {0},countTrueGroup[p]={0},pData[p*k]={0},countPerm = 0;
-		double centerData[k][row] = {0},pointToCenterDistance[column][k] = {0};		
-//		printf("\ncountTrueGroup:\n");
-//		for(i=0;i<p;i++)
-//				printf("%d ",countTrueGroup[i]);
-//		printf("\n");
+		double centerData[k][row] = {0},pointToCenterDistance[column][k] = {0},total = 0;		
 		//save true group
 		for(i=0;i<column;i++)			
 			trueGroupData[i] = dataSet[i][row];
@@ -75,24 +70,14 @@ int main()
 				}
 			}
 		}
-//		printf("r:\n");
-//		for(i=0;i<k;i++)
-//			printf("%d  ",r[i]);
-//		printf("\n");
 		for(i=0;i<k;i++)
 			for(j=0;j<row;j++)
 				centerData[i][j] = dataSet[r[i]][j];
-//		printf("\ncenterData:\n");
-//		for(i=0;i<k;i++)
-//		{
-//			for(j=0;j<row;j++)
-//				printf("%f  ",centerData[i][j]);
-//			printf("\n");
-//		}
 		while(co <= maxIteration)
 		{
 			double x[k][row] = {0};
 			int countx[k] = {0};		
+			total = 0;
 			//clear x[][]
 			for(h=0;h<k;h++)
 				for(j=0;j<row;j++)
@@ -101,23 +86,9 @@ int main()
 			for(i=0;i<column;i++)
 				for(h=0;h<k;h++)						
 					pointToCenterDistance[i][h] = countDistance(dataSet[i],centerData[h]);
-//			printf("\npointToCenterDistance:\n");
-//			for(i=0;i<column;i++)
-//			{
-//				for(h=0;h<k;h++)
-//						printf("%f  ",pointToCenterDistance[i][h]);
-//				printf("\n");
-//			}
 			//grouping
 			for(i=0;i<column;i++)
 				group(pointToCenterDistance[i],dataSet[i],k,row);
-//			printf("\ngroup:\n");
-//			for(i=0;i<column;i++)
-//			{
-//				for(h=0;h<=row;h++)
-//						printf("%f  ",dataSet[i][h]);
-//				printf("\n");
-//			}
 			//count every group
 			for(h=1;h<=k;h++)
 			{
@@ -139,38 +110,17 @@ int main()
 			for(i=0;i<k;i++)
 				for(j=0;j<row;j++)
 					centerData[i][j] = x[i][j];
-//			printf("\ncenterData:\n");
-//			for(i=0;i<k;i++)
-//			{
-//				for(j=0;j<row;j++)
-//					printf("%f  ",centerData[i][j]);
-//				printf("\n");
-//			}
-			//SSE count every group sum
-			double total = 0;			
+			//SSE count every group sum			
 			for(h=1;h<=k;h++)
-			{
-//				printf("h = %d\n",h);
 				for(i=0;i<column;i++)
-				{
 					if(dataSet[i][row] == h)
-					{
 						for(j=0;j<row;j++)
-						{
-//							printf("dataSet[%d][%d] = %f\n",i,j,dataSet[i][j]);
-//							printf("centerData[%d][%d] = %f\n",h-1,j,centerData[h-1][j]);
-							total += countsingleDistance(dataSet[i][j],centerData[h-1][j]);
-						}
-					}
-				}
-//				printf("total = %f\n\n",total);
-			}						
+							total += countsingleDistance(dataSet[i][j],centerData[h-1][j]);						
 			co++;
-			printf("SSE = %f\n",total);			
-//			printf("---------------------------------------------\n");			
+//			printf("SSE = %f\n",total);			
 		}		
 		countRun++;
-//		printf("\n");
+		sseRunData += total;
 		//taken out the dataSet group
 		perm(pData,sortData,0,k);
 		
@@ -179,18 +129,11 @@ int main()
 			int count=0;
 			for(i=0;i<column;i++)
 				sortTempData[i] = dataSet[i][row];
-//			printf("\nsortTempData:\n");
-//			for(i=0;i<column;i++)
-//				printf("%d\n",sortTempData[i]);
 			for(h=q*3;h<(q+1)*3;h++)
 			{				
 				sortData[count] = pData[h];
 				count++;
 			}
-//			printf("\nsortData:\n");
-//			for(i=0;i<k;i++)
-//				printf("%d",sortData[i]);
-//			printf("\nHHHHHHHHHHHHHHHHHHHHHHHH:\n");
 			for(i=0;i<column;i++)
 	    	{
 				for(j=0;j<k;j++)
@@ -202,33 +145,22 @@ int main()
 					}
 				}				
 			}			
-//			printf("\nnewSortTempData:\n");
-//			for(i=0;i<column;i++)
-//				printf("%d\n",sortTempData[i]);
-//			printf("\ntrueGroupData:\n");
-//			for(i=0;i<column;i++)
-//				printf("%d\n",trueGroupData[i]);			
 			for(i=0;i<column;i++)
-	    	{
 	    		if(trueGroupData[i] == sortTempData[i])
-				{
-//					printf("\ntrueGroupData[%d] = %d\n",i,sortTempData[i]);
-//					printf("sortTempData[%d] = %d\n",i,sortTempData[i]);					
 					countTrueGroup[q]++;
-				}
-			}
-//			printf("\ncountTrueGroup:\n");
-//			for(i=0;i<=q;i++)
-//				printf("%d ",countTrueGroup[i]);
-//			printf("\n");
 			if(bestTrueGroup < countTrueGroup[q])
 				bestTrueGroup = countTrueGroup[q];			
-		}
-		printf("bestTrueGroup = %d\n",bestTrueGroup);
+		}		
+//		printf("bestTrueGroup = %d\n",bestTrueGroup);
 		double percentage;
 		percentage = ((double)bestTrueGroup/(double)column)*100.0;
-		printf("percentage = %f\n",percentage);					
+//		printf("percentage = %f\n",percentage);		
+		percentRunData += percentage;
 	}
+	sseRunData = sseRunData / run;
+	percentRunData = percentRunData / run;
+	printf("avgSSE = %f\n",sseRunData);
+	printf("avgPercent = %f\n",percentRunData);
 }
 
 double countDistance(double point[],double center[])
